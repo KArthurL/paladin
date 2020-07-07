@@ -10,8 +10,11 @@
         <module name="paladinclient" />
         <module name="paladinzookeeper" />
         <module name="paladinsample" />
+        <module name="paladintransport" />
         <module name="paladinapi" />
         <module name="paladinchannel" />
+        <module name="paladinserialization" />
+        <module name="paladinmonitor" />
         <module name="paladinthread" />
       </profile>
     </annotationProcessing>

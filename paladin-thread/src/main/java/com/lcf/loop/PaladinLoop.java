@@ -122,7 +122,7 @@ public class PaladinLoop extends AbstractExecutorService {
 
 
     private void doStartThread(){
-        if(thread==null){
+        if(thread!=null){
             throw new IllegalStateException("loop error");
         }
         executor.execute(new Runnable() {
