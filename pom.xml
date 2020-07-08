@@ -30,10 +30,18 @@
         <log4j.version>1.7.10</log4j.version>
         <junit.version>4.12</junit.version>
         <jctool.version>3.0.0</jctool.version>
+        <guava.version>29.0-jre</guava.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-context</artifactId>
@@ -49,6 +57,11 @@
             <dependency>
                 <groupId>com.dyuproject.protostuff</groupId>
                 <artifactId>protostuff-core</artifactId>
+                <version>${protostuff.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dyuproject.protostuff</groupId>
+                <artifactId>protostuff-runtime</artifactId>
                 <version>${protostuff.version}</version>
             </dependency>
             <dependency>
@@ -76,7 +89,7 @@
             <dependency>
                 <groupId>org.jctools</groupId>
                 <artifactId>jctools-core</artifactId>
-                <version>${jctool.version}}</version>
+                <version>${jctool.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
