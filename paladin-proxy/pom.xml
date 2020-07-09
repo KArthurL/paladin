@@ -9,14 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>paladin-monitor</artifactId>
+    <artifactId>paladin-proxy</artifactId>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.lcf</groupId>
-            <artifactId>paladin-api</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-    </dependencies>
 
 </project>

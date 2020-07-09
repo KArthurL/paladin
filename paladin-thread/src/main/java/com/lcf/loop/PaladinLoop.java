@@ -37,6 +37,7 @@ public class PaladinLoop extends AbstractExecutorService {
 
     private volatile int properties=MUTI;
 
+    private final int id;
 
     private PaladinLoopGroup parent;
 
@@ -50,11 +51,12 @@ public class PaladinLoop extends AbstractExecutorService {
     private static final AtomicIntegerFieldUpdater<PaladinLoop> STATE_UPDATER =
             AtomicIntegerFieldUpdater.newUpdater(PaladinLoop.class, "state");
 
-    PaladinLoop(PaladinLoopGroup parent,Executor executor,Queue<Runnable> queue,RejectedHandler rejectedHandler){
+    PaladinLoop(PaladinLoopGroup parent,Executor executor,Queue<Runnable> queue,RejectedHandler rejectedHandler,int id){
         this.parent=parent;
         this.executor=executor;
         this.queue=queue;
         this.rejectedHandler=rejectedHandler;
+        this.id=id;
     }
 
     private void run(){
@@ -191,5 +193,9 @@ public class PaladinLoop extends AbstractExecutorService {
 
     public void setProperties(int properties) {
         this.properties = properties;
+    }
+
+    public int getId(){
+        return id;
     }
 }

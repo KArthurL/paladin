@@ -50,7 +50,7 @@ public class PaladinLoopGroup extends AbstractExecutorService {
         for(int i=0;i<nThreads;i++){
             boolean success=false;
             try{
-                children[i]=newChild();
+                children[i]=newChild(i);
                 success=true;
             }catch (Exception e){
                 logger.error("failed to creat a child"+e);
@@ -68,9 +68,13 @@ public class PaladinLoopGroup extends AbstractExecutorService {
 
 
 
-    private PaladinLoop newChild(){
-        return new PaladinLoop(this,executor,new MpscUnboundedArrayQueue<>(DEFAULT_MAX_CAPACITANCE),
-                RejectedHandlerFactory.reject(RejectedHandlerFactory.REJECT));
+    private PaladinLoop newChild(int id){
+        return new PaladinLoop(this
+                ,executor
+                ,new MpscUnboundedArrayQueue<>(DEFAULT_MAX_CAPACITANCE)
+                , RejectedHandlerFactory.reject(RejectedHandlerFactory.REJECT)
+                ,id
+                );
     }
 
 

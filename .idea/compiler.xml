@@ -6,6 +6,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="paladinproxy" />
         <module name="paladinserver" />
         <module name="paladinclient" />
         <module name="paladinzookeeper" />
@@ -18,5 +19,6 @@
         <module name="paladinthread" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel target="8" />
   </component>
 </project>
