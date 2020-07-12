@@ -69,6 +69,11 @@ public class PaladinThreadLocal<V> {
 
     private V initialize(PaladinThreadLocalMap threadLocalMap) {
         V v = null;
+        try {
+            v = initialValue();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         threadLocalMap.setVariable(index, v);
         addToVariablesToRemove(threadLocalMap, this);
         return v;
@@ -92,6 +97,10 @@ public class PaladinThreadLocal<V> {
         removeFromVariablesToRemove(threadLocalMap,this);
     }
 
+    public final void remove() {
+        remove(PaladinThreadLocalMap.getIfSet());
+    }
+
     public static void removeAll(){
         PaladinThreadLocalMap threadLocalMap=PaladinThreadLocalMap.getIfSet();
         if(threadLocalMap==null){
@@ -105,6 +114,10 @@ public class PaladinThreadLocal<V> {
             }
         }
         PaladinThreadLocalMap.remove();
+    }
+
+    protected V initialValue() throws Exception {
+        return null;
     }
 
 }

@@ -21,7 +21,7 @@ public class TimeUtil {
             }
         });
         daemon.setDaemon(true);
-        daemon.setName("sentinel-time-tick-thread");
+        daemon.setName("paladin-time-tick-thread");
         daemon.start();
     }
 
