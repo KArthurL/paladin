@@ -18,4 +18,5 @@ import java.lang.annotation.Target;
 public @interface RpcService {
     String group () default "paladin";
     String version() default "1.0.0" ;
+    String type() default "muti";
 }

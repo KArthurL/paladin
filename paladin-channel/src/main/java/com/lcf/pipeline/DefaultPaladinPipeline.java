@@ -8,7 +8,10 @@ import com.lcf.common.RpcResponse;
 import com.lcf.context.AbstractContext;
 import com.lcf.context.Context;
 import org.springframework.cglib.reflect.FastClass;
+import org.springframework.cglib.reflect.FastMethod;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
@@ -19,15 +22,13 @@ import java.util.Objects;
 public class DefaultPaladinPipeline extends AbstractPipeline {
 
 
-
     private final FastClass serviceFastClass;
 
-    protected DefaultPaladinPipeline(Channel channel,Class<?> clazz,Object invoker){
-        super(channel,clazz,invoker);
-        serviceFastClass=FastClass.create(clazz);
+    protected DefaultPaladinPipeline(Channel channel, Class<?> clazz, Object invoker) {
+        super(channel, clazz, invoker);
+        serviceFastClass = FastClass.create(clazz);
 
     }
-
 
 
     @Override
@@ -44,7 +45,6 @@ public class DefaultPaladinPipeline extends AbstractPipeline {
     private class PaladinHeadContext extends AbstractContext {
 
 
-
         protected PaladinHeadContext(Pipeline pipeline) {
             super("paladinHeadContext", pipeline);
         }
@@ -52,9 +52,9 @@ public class DefaultPaladinPipeline extends AbstractPipeline {
         @Override
         protected void handle(Object obj) {
 
-            if(obj instanceof RpcRequest){
-                RpcRequest rpcRequest=(RpcRequest)obj;
-                RpcContext rpcContext=RpcContext.getContext();
+            if (obj instanceof RpcRequest) {
+                RpcRequest rpcRequest = (RpcRequest) obj;
+                RpcContext rpcContext = RpcContext.getContext();
                 rpcContext.setRpcRequest(rpcRequest);
                 rpcContext.setTraceId(rpcRequest.getRequestId());
             }
@@ -62,25 +62,25 @@ public class DefaultPaladinPipeline extends AbstractPipeline {
 
         @Override
         protected void response(Object obj) {
-            RpcContext rpcContext =RpcContext.getContext();
-            RpcRequest rpcRequest=rpcContext.getRpcRequest();
-            try{
-                RpcResponse response=buildResponse(rpcRequest.getRequestId()
-                        ,true
-                        ,obj
-                        ,null);
+            RpcContext rpcContext = RpcContext.getContext();
+            RpcRequest rpcRequest = rpcContext.getRpcRequest();
+            try {
+                RpcResponse response = buildResponse(rpcRequest.getRequestId()
+                        , true
+                        , obj
+                        , null);
                 getChannel().response(response);
-            }catch (Exception e){
+            } catch (Exception e) {
                 logger.error("rpcContext has no request!");
                 throw new RuntimeException("rpcContext has error");
-            }finally{
+            } finally {
                 RpcContext.remove();
             }
         }
 
         @Override
         protected void caughtException(Object obj) {
-            if(obj instanceof Exception) {
+            if (obj instanceof Exception) {
                 RpcContext rpcContext = RpcContext.getContext();
                 RpcRequest rpcRequest = rpcContext.getRpcRequest();
                 try {
@@ -89,16 +89,16 @@ public class DefaultPaladinPipeline extends AbstractPipeline {
                             , null
                             , obj);
                     getChannel().exception(response);
-                } catch (Exception e){
+                } catch (Exception e) {
                     logger.error(e.getMessage());
-                }finally {
+                } finally {
                     RpcContext.remove();
                 }
             }
         }
 
-        private RpcResponse buildResponse(String id, boolean success, Object result, Object exception){
-            RpcResponse response=new RpcResponse();
+        private RpcResponse buildResponse(String id, boolean success, Object result, Object exception) {
+            RpcResponse response = new RpcResponse();
             response.setRequestId(id);
             response.setException(exception);
             response.setResult(result);
@@ -108,7 +108,7 @@ public class DefaultPaladinPipeline extends AbstractPipeline {
     }
 
 
-    private class PaladinTailContext extends AbstractContext{
+    private class PaladinTailContext extends AbstractContext {
 
         protected PaladinTailContext(Pipeline pipeline) {
             super("paladinTailContext", pipeline);
@@ -116,16 +116,16 @@ public class DefaultPaladinPipeline extends AbstractPipeline {
 
         @Override
         protected void handle(Object obj) {
-            if(obj instanceof RpcRequest){
-                RpcRequest rpcRequest=(RpcRequest)obj;
-                String     methodName     = rpcRequest.getMethodName();
+            if (obj instanceof RpcRequest) {
+                RpcRequest rpcRequest = (RpcRequest) obj;
+                String methodName = rpcRequest.getMethodName();
                 Class<?>[] parameterTypes = rpcRequest.getParameterTypes();
-                Object[]   arguments     = rpcRequest.getArguments();
-                int methodIndex=serviceFastClass.getIndex(methodName,parameterTypes);
-                try{
-                    Object result=serviceFastClass.invoke(methodIndex,getInvoker(),arguments);
+                Object[] arguments = rpcRequest.getArguments();
+                int methodIndex = serviceFastClass.getIndex(methodName, parameterTypes);
+                try {
+                    Object result = serviceFastClass.invoke(methodIndex, getInvoker(), arguments);
                     getPipeline().response(result);
-                }catch (Exception e){
+                } catch (Exception e) {
                     getPipeline().exception(e);
                 }
             }
@@ -141,8 +141,5 @@ public class DefaultPaladinPipeline extends AbstractPipeline {
             return;
         }
     }
-
-
-
 
 }
