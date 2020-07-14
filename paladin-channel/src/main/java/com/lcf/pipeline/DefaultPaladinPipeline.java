@@ -24,7 +24,7 @@ public class DefaultPaladinPipeline extends AbstractPipeline {
 
     private final FastClass serviceFastClass;
 
-    protected DefaultPaladinPipeline(Channel channel, Class<?> clazz, Object invoker) {
+    public DefaultPaladinPipeline(Channel channel, Class<?> clazz, Object invoker) {
         super(channel, clazz, invoker);
         serviceFastClass = FastClass.create(clazz);
 
@@ -56,20 +56,21 @@ public class DefaultPaladinPipeline extends AbstractPipeline {
                 RpcRequest rpcRequest = (RpcRequest) obj;
                 RpcContext rpcContext = RpcContext.getContext();
                 rpcContext.setRpcRequest(rpcRequest);
-                rpcContext.setTraceId(rpcRequest.getRequestId());
+
             }
         }
 
         @Override
         protected void response(Object obj) {
-            RpcContext rpcContext = RpcContext.getContext();
-            RpcRequest rpcRequest = rpcContext.getRpcRequest();
             try {
+                RpcContext rpcContext = RpcContext.getContext();
+                RpcRequest rpcRequest = rpcContext.getRpcRequest();
+                io.netty.channel.Channel channel=rpcContext.getChannel();
                 RpcResponse response = buildResponse(rpcRequest.getRequestId()
                         , true
                         , obj
                         , null);
-                getChannel().response(response);
+                getChannel().response(response,channel);
             } catch (Exception e) {
                 logger.error("rpcContext has no request!");
                 throw new RuntimeException("rpcContext has error");
@@ -81,14 +82,15 @@ public class DefaultPaladinPipeline extends AbstractPipeline {
         @Override
         protected void caughtException(Object obj) {
             if (obj instanceof Exception) {
-                RpcContext rpcContext = RpcContext.getContext();
-                RpcRequest rpcRequest = rpcContext.getRpcRequest();
                 try {
+                    RpcContext rpcContext = RpcContext.getContext();
+                    RpcRequest rpcRequest = rpcContext.getRpcRequest();
+                    io.netty.channel.Channel channel=rpcContext.getChannel();
                     RpcResponse response = buildResponse(rpcRequest.getRequestId()
                             , false
                             , null
                             , obj);
-                    getChannel().exception(response);
+                    getChannel().exception(response,channel);
                 } catch (Exception e) {
                     logger.error(e.getMessage());
                 } finally {

@@ -1,13 +1,12 @@
 package com.lcf;
 
-import com.lcf.netty.handler.ClientInitializer;
+import com.lcf.netty.decoder.PaladinDecoder;
+import com.lcf.netty.encoder.PaladinEncoder;
 import com.lcf.netty.handler.PaladinClientHandler;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,13 +32,18 @@ public class ConnectManage {
     private static ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(16, 16,
             600L, TimeUnit.SECONDS, new LinkedBlockingDeque<>(65536));
 
-    private CopyOnWriteArrayList<PaladinClientHandler> connectedHandlers = new CopyOnWriteArrayList<>();
+    //private CopyOnWriteArrayList<PaladinClientHandler> connectedHandlers = new CopyOnWriteArrayList<>();
     private Map<InetSocketAddress, PaladinClientHandler> connectedServerNodes = new ConcurrentHashMap<>();
 
+    private Map<String,List<PaladinClientHandler>> connectedHandlers=new ConcurrentHashMap<>();
+
+
     private ReentrantLock lock = new ReentrantLock();
+    private Map<String,Condition> conditions=new ConcurrentHashMap<>();
     private Condition connected = lock.newCondition();
     private long connectTimeoutMillis = 6000;
-    private AtomicInteger roundRobin = new AtomicInteger(0);
+    private Map<String,AtomicInteger> roundRobins=new ConcurrentHashMap<>();
+    //private AtomicInteger roundRobin = new AtomicInteger(0);
     private volatile boolean isRuning = true;
 
     private ConnectManage() {
@@ -56,7 +60,7 @@ public class ConnectManage {
         return connectManage;
     }
 
-    public void updateConnectedServer(List<String> allServerAddress) {
+    public void updateConnectedServer(String service,List<String> allServerAddress) {
         if (allServerAddress != null) {
             if (allServerAddress.size() > 0) {  // Get available server node
                 //update local serverNodes cache
@@ -74,13 +78,14 @@ public class ConnectManage {
                 // Add new server node
                 for (final InetSocketAddress serverNodeAddress : newAllServerNodeSet) {
                     if (!connectedServerNodes.keySet().contains(serverNodeAddress)) {
-                        connectServerNode(serverNodeAddress);
+                        connectServerNode(service,serverNodeAddress);
                     }
                 }
 
                 // Close and remove invalid server nodes
-                for (int i = 0; i < connectedHandlers.size(); ++i) {
-                    PaladinClientHandler connectedServerHandler = connectedHandlers.get(i);
+                List<PaladinClientHandler> serviceHandlers=connectedHandlers.get(service);
+                for (int i = 0; i < serviceHandlers.size(); ++i) {
+                    PaladinClientHandler connectedServerHandler = serviceHandlers.get(i);
                     SocketAddress remotePeer = connectedServerHandler.getAddress();
                     if (!newAllServerNodeSet.contains(remotePeer)) {
                         logger.info("移除无效节点 " + remotePeer);
@@ -89,106 +94,104 @@ public class ConnectManage {
                             handler.close();
                         }
                         connectedServerNodes.remove(remotePeer);
-                        connectedHandlers.remove(connectedServerHandler);
+                        serviceHandlers.remove(connectedServerHandler);
                     }
                 }
 
+
             } else { // No available server node ( All server nodes are down )
                 logger.error("No available server node. All server nodes are down !!!");
-                for (final PaladinClientHandler connectedServerHandler : connectedHandlers) {
+                for (final PaladinClientHandler connectedServerHandler : connectedHandlers.get(service)) {
                     SocketAddress remotePeer = connectedServerHandler.getAddress();
                     PaladinClientHandler handler = connectedServerNodes.get(remotePeer);
                     handler.close();
                     connectedServerNodes.remove(connectedServerHandler);
                 }
-                connectedHandlers.clear();
+                connectedHandlers.getOrDefault(service,new CopyOnWriteArrayList<>()).clear();
             }
         }
     }
 
-    public void reconnect(final PaladinClientHandler handler, final SocketAddress remotePeer) {
-        if (handler != null) {
-            connectedHandlers.remove(handler);
-            connectedServerNodes.remove(handler.getAddress());
-        }
-        connectServerNode((InetSocketAddress) remotePeer);
-    }
 
-    private void connectServerNode(final InetSocketAddress remotePeer) {
-        
-        threadPoolExecutor.submit(new Runnable() {
-            @Override
-            public void run() {
-                Bootstrap b = new Bootstrap();
-                b.group(eventLoopGroup)
-                        .channel(NioSocketChannel.class)
-                        .handler(new ClientInitializer());
+    private void connectServerNode(String service, final InetSocketAddress remotePeer) {
+        if(!connectedServerNodes.containsKey(remotePeer)) {
+            threadPoolExecutor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    Bootstrap b = new Bootstrap();
+                    b.group(eventLoopGroup)
+                            .channel(NioSocketChannel.class)
+                            .handler(new ChannelInitializer<SocketChannel>() {
+                                @Override
+                                protected void initChannel(SocketChannel socketChannel) throws Exception {
+                                    socketChannel.pipeline()
+                                            .addLast(new PaladinEncoder())
+                                            .addLast(new PaladinDecoder())
+                                            .addLast(new PaladinClientHandler(service));
+                                }
+                            });
 
-                ChannelFuture channelFuture = b.connect(remotePeer);
-                channelFuture.addListener(new ChannelFutureListener() {
-                    @Override
-                    public void operationComplete(final ChannelFuture channelFuture) throws Exception {
-                        if (channelFuture.isSuccess()) {
-                            logger.info("Successfully connect to remote server. remote peer = " + remotePeer);
-                            PaladinClientHandler handler = channelFuture.channel().pipeline().get(PaladinClientHandler.class);
-                            addHandler(handler);
+                    ChannelFuture channelFuture = b.connect(remotePeer);
+                    channelFuture.addListener(new ChannelFutureListener() {
+                        @Override
+                        public void operationComplete(final ChannelFuture channelFuture) throws Exception {
+                            if (channelFuture.isSuccess()) {
+                                logger.info("Successfully connect to remote server. remote peer = " + remotePeer);
+                                PaladinClientHandler handler = channelFuture.channel().pipeline().get(PaladinClientHandler.class);
+                                addHandler(service, handler);
+                            }
                         }
-                    }
-                });
-            }
-        });
+                    });
+                }
+            });
+        }else{
+            connectedHandlers.getOrDefault(service,new CopyOnWriteArrayList<>()).add(connectedServerNodes.get(remotePeer));
+        }
     }
 
-    private void addHandler(PaladinClientHandler handler) {
-        connectedHandlers.add(handler);
+    private void addHandler(String service,PaladinClientHandler handler) {
+        connectedHandlers.getOrDefault(service,new CopyOnWriteArrayList<>()).add(handler);
         InetSocketAddress remoteAddress = (InetSocketAddress) handler.getChannel().remoteAddress();
         connectedServerNodes.put(remoteAddress, handler);
-        signalAvailableHandler();
+        signalAvailableHandler(service);
     }
 
-    private void signalAvailableHandler() {
+    private void signalAvailableHandler(String service) {
         lock.lock();
         try {
-            connected.signalAll();
+            conditions.getOrDefault(service,lock.newCondition()).signalAll();
         } finally {
             lock.unlock();
         }
     }
 
-    private boolean waitingForHandler() throws InterruptedException {
+    private boolean waitingForHandler(String service) throws InterruptedException {
         lock.lock();
         try {
-            return connected.await(this.connectTimeoutMillis, TimeUnit.MILLISECONDS);
+            return conditions.getOrDefault(service,lock.newCondition()).await(this.connectTimeoutMillis, TimeUnit.MILLISECONDS);
         } finally {
             lock.unlock();
         }
     }
 
-    public PaladinClientHandler chooseHandler() {
-        int size = connectedHandlers.size();
+    public PaladinClientHandler chooseHandler(String service) {
+        List<PaladinClientHandler> handlers=connectedHandlers.get(service);
+        int size = handlers.size();
         while (isRuning && size <= 0) {
             try {
-                boolean available = waitingForHandler();
+                boolean available = waitingForHandler(service);
                 if (available) {
-                    size = connectedHandlers.size();
+                    size = handlers.size();
                 }
             } catch (InterruptedException e) {
                 logger.error("Waiting for available node is interrupted! ", e);
                 throw new RuntimeException("Can't connect any servers!", e);
             }
         }
+        AtomicInteger roundRobin=roundRobins.getOrDefault(service,new AtomicInteger(0));
         int index = (roundRobin.getAndAdd(1) + size) % size;
-        return connectedHandlers.get(index);
+        return handlers.get(index);
     }
 
-    public void stop() {
-        isRuning = false;
-        for (int i = 0; i < connectedHandlers.size(); ++i) {
-            PaladinClientHandler connectedServerHandler = connectedHandlers.get(i);
-            connectedServerHandler.close();
-        }
-        signalAvailableHandler();
-        threadPoolExecutor.shutdown();
-        eventLoopGroup.shutdownGracefully();
-    }
+
 }

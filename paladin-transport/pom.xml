@@ -26,5 +26,15 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.lcf</groupId>
+            <artifactId>paladin-serialization</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.lcf</groupId>
+            <artifactId>paladin-channel</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 </project>

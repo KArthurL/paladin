@@ -1,6 +1,7 @@
 package com.lcf.common;
 
 import com.lcf.threadlocal.PaladinThreadLocal;
+import io.netty.channel.Channel;
 
 public class RpcContext {
 
@@ -19,6 +20,7 @@ public class RpcContext {
 
     private RpcResponse rpcResponse;
 
+    private Channel channel;
 
     public String getTraceId() {
         return traceId;
@@ -58,5 +60,13 @@ public class RpcContext {
     }
     public static void remove(){
         LOCAL_CONTEXT.remove();
+    }
+
+    public Channel getChannel() {
+        return channel;
+    }
+
+    public void setChannel(Channel channel) {
+        this.channel = channel;
     }
 }
