@@ -28,7 +28,6 @@ public class PaladinChannelManager {
     }
 
     public void response(Object object,io.netty.channel.Channel channel){
-
         PaladinMessage response=buildMessage(object);
         channel.writeAndFlush(response);
 

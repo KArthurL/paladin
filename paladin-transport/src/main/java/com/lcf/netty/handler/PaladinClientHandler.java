@@ -84,7 +84,7 @@ public class PaladinClientHandler extends SimpleChannelInboundHandler<PaladinMes
             if(response.isSuccess()) {
                 Object result = response.getResult();
                 if (result instanceof AsyncInvokeFuture) {
-                    return;
+                    response.setResult(((AsyncInvokeFuture) result).response.getResult());
                 }
                 AsyncInvokeFuture future = invokeMap.remove(response.getRequestId());
                 if (future != null) {

@@ -31,12 +31,8 @@ public class PaladinServerHandler extends SimpleChannelInboundHandler<PaladinMes
             byte[] data=msg.getContent();
             RpcRequest rpcRequest= ProtobufferSerializeUtil.deserializer(data,RpcRequest.class);
             String service=rpcRequest.getServiceName();
-            executorService.execute(new Runnable() {
-                @Override
-                public void run() {
-                    paladinChannelManager.invoke(rpcRequest,service,ctx.channel());
-                }
-            });
+            executorService.execute(() ->
+                    paladinChannelManager.invoke(rpcRequest,service,ctx.channel()));
         }
     }
 
