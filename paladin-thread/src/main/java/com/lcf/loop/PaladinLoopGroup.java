@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class PaladinLoopGroup extends AbstractExecutorService {
 
-    private static final int DEFAULT_MAX_CAPACITANCE=1024;
+    private static final int DEFAULT_MAX_CAPACITANCE=256;
     private static final int DEFAULT_EVENT_LOOP_THREADS=100;
 
     private static final Logger logger= LoggerFactory.getLogger(PaladinLoopGroup.class);
