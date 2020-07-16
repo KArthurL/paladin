@@ -36,8 +36,11 @@ public class PaladinChannelManager{
     private  final Map<String,Integer> singleIndexs=new HashMap();
     private  volatile Map<String,List<Integer>> indexs=new HashMap<>();
 
+    private int threads=0;
+    private int size=0;
     public PaladinChannelManager (Map<String, Entry> map){
         if(map!=null){
+            size=map.keySet().size();
             map.entrySet().forEach(elemnt ->{
                 String service =elemnt.getKey();
                 Entry entry=elemnt.getValue();
@@ -58,6 +61,7 @@ public class PaladinChannelManager{
     }
 
     public synchronized void init(int nThreads){
+        threads=nThreads;
         int size=singleService.size()+mutiService.size();
         if(size>nThreads){
             throw new RuntimeException("Too many providers, please increase the number of threads! ");
@@ -156,5 +160,13 @@ public class PaladinChannelManager{
         }
         return -1;
 
+    }
+
+    public int getThreads() {
+        return threads;
+    }
+
+    public int getSize() {
+        return size;
     }
 }

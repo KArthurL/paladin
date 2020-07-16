@@ -9,6 +9,5 @@ public interface Monitor {
 
 
     void handle();
-    int getThreadId(String service);
 
 }

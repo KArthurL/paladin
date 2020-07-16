@@ -8,6 +8,8 @@ import com.lcf.context.AbstractContext;
 import com.lcf.metric.Metric;
 import com.lcf.metric.PaladinMetric;
 
+import java.util.concurrent.RejectedExecutionException;
+
 
 public class MetricContext extends AbstractContext {
 
@@ -20,7 +22,7 @@ public class MetricContext extends AbstractContext {
         paladinMetric=new PaladinMetric(sampleCount,intervalInMs);
     }
 
-    private final Metric paladinMetric;
+    private final PaladinMetric paladinMetric;
 
 
     @Override
@@ -56,6 +58,9 @@ public class MetricContext extends AbstractContext {
     @Override
     protected void caughtException(Object obj) {
         paladinMetric.addException(1);
+        if(obj instanceof RejectedExecutionException){
+            paladinMetric.addReject(1);
+        }
     }
 
     public Metric getPaladinMetric(){

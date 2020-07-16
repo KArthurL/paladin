@@ -90,6 +90,10 @@ public interface Metric {
      */
     void addRT(long rt);
 
+    void addReject(int n);
+
+    long reject();
+
     /**
      * Get the sliding window length in seconds.
      *

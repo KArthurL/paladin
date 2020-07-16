@@ -99,6 +99,13 @@ public class MetricBucket {
             minRt = rt;
         }
     }
+    public void addReject(int n){
+        add(MetricEvent.REJECT,n);
+    }
+
+    public long reject(){
+        return get(MetricEvent.REJECT);
+    }
 
     @Override
     public String toString() {

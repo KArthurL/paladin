@@ -125,6 +125,24 @@ public class PaladinMetric implements Metric{
     }
 
     @Override
+    public void addReject(int n) {
+        WindowWrap<MetricBucket> wrap = data.currentWindow();
+        wrap.value().addReject(n);
+    }
+
+    @Override
+    public long reject() {
+        data.currentWindow();
+        long pass = 0;
+        List<MetricBucket> list = data.values();
+
+        for (MetricBucket window : list) {
+            pass += window.reject();
+        }
+        return pass;
+    }
+
+    @Override
     public double getWindowIntervalInSec() {
        return data.getIntervalInSecond();
     }
