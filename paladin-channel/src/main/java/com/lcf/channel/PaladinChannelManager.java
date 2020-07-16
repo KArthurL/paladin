@@ -13,11 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * 管理service的类
@@ -32,10 +32,11 @@ public class PaladinChannelManager{
     private  final Map<String, com.lcf.channel.Channel> channels=new ConcurrentHashMap<>();
     private  final Set<String> singleService=new HashSet<>();
     private  final Set<String> mutiService=new HashSet<>();
-
+    private  final Map<String, LongAdder> roundRobins=new HashMap<>();
+    private  final Map<String,Integer> singleIndexs=new HashMap();
+    private  volatile Map<String,List<Integer>> indexs=new HashMap<>();
 
     public PaladinChannelManager (Map<String, Entry> map){
-
         if(map!=null){
             map.entrySet().forEach(elemnt ->{
                 String service =elemnt.getKey();
@@ -47,10 +48,39 @@ public class PaladinChannelManager{
                 channels.put(service,paladinChannel);
                 if(RpcConstans.SINGLE_TYPE.equals(entry.getType())){
                     singleService.add(service);
+
                 }else{
                     mutiService.add(service);
                 }
+                roundRobins.put(service,new LongAdder());
             });
+        }
+    }
+
+    public synchronized void init(int nThreads){
+        int size=singleService.size()+mutiService.size();
+        if(size>nThreads){
+            throw new RuntimeException("Too many providers, please increase the number of threads! ");
+        }else{
+            int id=0;
+            for(String singleService:singleService){
+                singleIndexs.put(singleService,id++);
+            }
+            int last=nThreads-id;
+            int avg=last/mutiService.size();
+            for(String service:mutiService){
+                List<Integer> list=new ArrayList<>();
+                for(int i=0;i<avg;i++){
+                    list.add(id++);
+                }
+                if((last-id)<avg){
+                    for(int i=id;i<nThreads;i++){
+                        list.add(i++);
+                    }
+                }
+                indexs.put(service,list);
+            }
+
         }
     }
 
@@ -99,5 +129,32 @@ public class PaladinChannelManager{
 
     public Set<String> getMutiService() {
         return mutiService;
+    }
+
+    public synchronized void setIndexs(Map<String,List<Integer>> indexs){
+        this.indexs=indexs;
+    }
+
+    public int getIndex(String service){
+        if(singleIndexs.containsKey(service)){
+            return singleIndexs.get(service)==null?0:singleIndexs.get(service);
+        }
+        LongAdder longAdder=roundRobins.get(service);
+        List<Integer> list=indexs.get(service);
+        if(list!=null&&list.size()>0){
+            longAdder.increment();
+            long x=longAdder.longValue();
+            if(x<0){
+                //可能会重复设置，但问题不大
+                longAdder.reset();
+                return list.get(0);
+            }else{
+                int size=list.size();
+                return list.get((int)(x%(Integer.valueOf(size).longValue())));
+            }
+
+        }
+        return -1;
+
     }
 }

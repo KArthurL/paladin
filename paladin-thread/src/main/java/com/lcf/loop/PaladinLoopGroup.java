@@ -1,5 +1,6 @@
 package com.lcf.loop;
 
+import com.lcf.PaladinTask;
 import com.lcf.channel.PaladinChannelManager;
 import com.lcf.executor.PerTaskExecutor;
 import com.lcf.threadfactory.PaladinThreadFactory;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 
@@ -22,7 +24,6 @@ public class PaladinLoopGroup extends AbstractExecutorService {
 
     private static final int DEFAULT_MAX_CAPACITANCE=256;
     private static final int DEFAULT_EVENT_LOOP_THREADS=100;
-
     private static final Logger logger= LoggerFactory.getLogger(PaladinLoopGroup.class);
     private final PaladinLoop[] children;
     private final Executor executor;
@@ -67,7 +68,9 @@ public class PaladinLoopGroup extends AbstractExecutorService {
 
 
 
-
+    public int size(){
+        return children.length;
+    }
 
     private PaladinLoop newChild(int id){
         return new PaladinLoop(this
@@ -110,7 +113,13 @@ public class PaladinLoopGroup extends AbstractExecutorService {
 
     @Override
     public void execute(Runnable command) {
-
+        int index= ThreadLocalRandom.current().nextInt(children.length);
+        if(command instanceof PaladinTask){
+            String service =((PaladinTask) command).getService();
+            int n=paladinChannelManager.getIndex(service);
+            index=(n>=children.length||n<0)?index:n;
+        }
+        children[index].execute(command);
     }
 
     public PaladinChannelManager getPaladinChannelManager() {

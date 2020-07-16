@@ -6,9 +6,11 @@ import com.lcf.constants.RpcConstans;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * 监控类,监控服务的流量数据，并进行线程的动态分配
@@ -27,12 +29,11 @@ public class PaladinMonitor implements Monitor {
 
 
 
-
     public PaladinMonitor(PaladinChannelManager paladinChannelManager){
         this.paladinChannelManager=paladinChannelManager;
     }
 
-    public void init(int nThreads){
+    public void init(){
         if(paladinChannelManager!=null){
             Set<String> services=paladinChannelManager.getServices();
             int nums=services.size();
