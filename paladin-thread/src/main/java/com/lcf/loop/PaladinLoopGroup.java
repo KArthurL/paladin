@@ -1,5 +1,6 @@
 package com.lcf.loop;
 
+import com.lcf.channel.PaladinChannelManager;
 import com.lcf.executor.PerTaskExecutor;
 import com.lcf.threadfactory.PaladinThreadFactory;
 import org.jctools.queues.MpscUnboundedArrayQueue;
@@ -26,7 +27,7 @@ public class PaladinLoopGroup extends AbstractExecutorService {
     private final PaladinLoop[] children;
     private final Executor executor;
 
-
+    private PaladinChannelManager paladinChannelManager;
 
 
     public PaladinLoopGroup(){
@@ -110,5 +111,13 @@ public class PaladinLoopGroup extends AbstractExecutorService {
     @Override
     public void execute(Runnable command) {
 
+    }
+
+    public PaladinChannelManager getPaladinChannelManager() {
+        return paladinChannelManager;
+    }
+
+    public void setPaladinChannelManager(PaladinChannelManager paladinChannelManager) {
+        this.paladinChannelManager = paladinChannelManager;
     }
 }

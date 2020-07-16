@@ -1,8 +1,7 @@
-package com.lcf.netty.handler;
+package com.lcf;
 
 import com.lcf.channel.PaladinChannelManager;
 import com.lcf.common.RpcRequest;
-import com.lcf.common.RpcResponse;
 import com.lcf.netty.common.PaladinMessage;
 import com.lcf.protobuffer.ProtobufferSerializeUtil;
 import io.netty.channel.ChannelHandlerContext;
@@ -10,7 +9,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
 import java.util.concurrent.ExecutorService;
 
 public class PaladinServerHandler extends SimpleChannelInboundHandler<PaladinMessage>{

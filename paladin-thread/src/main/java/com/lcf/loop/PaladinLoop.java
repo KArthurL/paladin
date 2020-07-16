@@ -1,5 +1,6 @@
 package com.lcf.loop;
 
+import com.lcf.constants.RpcConstans;
 import com.lcf.threadlocal.PaladinThreadLocal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +33,8 @@ public class PaladinLoop extends AbstractExecutorService {
     private volatile int state=ST_NOT_STARTED;
 
 
-    private static final int SINGLE=1;
-    private static final int MUTI=2;
 
-    private volatile int properties=MUTI;
+    private volatile int properties= RpcConstans.MUTI;
 
     private final int id;
 
@@ -46,7 +45,7 @@ public class PaladinLoop extends AbstractExecutorService {
     private final Executor executor;
     private final RejectedHandler rejectedHandler;
 
-    private volatile  boolean interrupted;
+    private volatile boolean interrupted;
 
     private static final AtomicIntegerFieldUpdater<PaladinLoop> STATE_UPDATER =
             AtomicIntegerFieldUpdater.newUpdater(PaladinLoop.class, "state");

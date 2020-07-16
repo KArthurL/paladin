@@ -22,14 +22,8 @@
             <artifactId>spring-context</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.lcf</groupId>
-            <artifactId>paladin-channel</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.lcf</groupId>
-            <artifactId>paladin-transport</artifactId>
-            <version>1.0.0</version>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
         </dependency>
     </dependencies>
 

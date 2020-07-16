@@ -9,5 +9,6 @@ public interface Monitor {
 
 
     void handle();
-    void addMetric(String service,MetricContext metricContext);
+    int getThreadId(String service);
+
 }

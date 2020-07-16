@@ -24,19 +24,17 @@
             <groupId>org.jctools</groupId>
             <artifactId>jctools-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.lcf</groupId>
+            <artifactId>paladin-api</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.lcf</groupId>
+            <artifactId>paladin-monitor</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>12</source>
-                    <target>12</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
 
 </project>

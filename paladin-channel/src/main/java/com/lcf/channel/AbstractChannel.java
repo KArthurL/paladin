@@ -29,7 +29,6 @@ public  abstract class AbstractChannel implements Channel{
         this.service=service;
         this.serviceClass=serviceClass;
         pipeline=new DefaultPaladinPipeline(this,serviceClass,invoker);
-
     }
 
     @Override
@@ -50,5 +49,10 @@ public  abstract class AbstractChannel implements Channel{
     @Override
     public List<Context> getContexts() {
         return pipeline.getContexts();
+    }
+
+    @Override
+    public Context getContext(Class<?> clazz) {
+        return pipeline.getContext(clazz);
     }
 }

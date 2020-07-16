@@ -142,6 +142,9 @@ public class DefaultPaladinPipeline extends AbstractPipeline {
         protected void caughtException(Object obj) {
             return;
         }
+
+
     }
+
 
 }

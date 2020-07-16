@@ -22,6 +22,8 @@ public interface Pipeline {
 
     Pipeline addContext(String name, Context context);
 
+    Context getContext(Class<?> clazz);
+
 
 
 }

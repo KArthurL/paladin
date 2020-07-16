@@ -28,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>com.lcf</groupId>
-            <artifactId>paladin-monitor</artifactId>
+            <artifactId>paladin-transport</artifactId>
             <version>1.0.0</version>
         </dependency>
     </dependencies>

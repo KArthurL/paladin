@@ -100,8 +100,31 @@ public abstract class AbstractPipeline implements Pipeline {
     }
 
 
+
+
     protected abstract Context newHead();
     protected abstract Context newTail();
 
+    @Override
+    public Context getContext(Class<?> clazz) {
+        if(clazz!=null){
+            Context start=head;
+            while(start!=null){
+                if (clazz.isAssignableFrom(start.getClass())){
+                    return start;
+                }else{
+                    start=start.next();
+                }
+            }
+        }
+
+        return null;
+    }
+
+
 
 }
+interface test{
+
+}
+class a implements test{}
