@@ -9,11 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.crypto.Data;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.stream.Collectors;
 
 /**
  * 监控类,监控服务的流量数据，并进行线程的动态分配
@@ -36,7 +35,7 @@ public class PaladinMonitor implements Monitor {
         this.paladinChannelManager=paladinChannelManager;
     }
 
-    public void init(){
+    public void init(int ms){
         if(paladinChannelManager!=null){
             Set<String> services=paladinChannelManager.getServices();
             int nums=services.size();
@@ -52,7 +51,7 @@ public class PaladinMonitor implements Monitor {
                     for(;;){
                         handle();
                         try {
-                            TimeUnit.SECONDS.sleep(1);
+                            TimeUnit.MILLISECONDS.sleep(20000);
                         } catch (InterruptedException e) {
                             LOGGER.error("moniter has interrupt : %s",e.getCause());
                         }
@@ -73,8 +72,37 @@ public class PaladinMonitor implements Monitor {
         int threads=paladinChannelManager.getThreads();
         int single=paladinChannelManager.getSingleService().size();
         int muti=paladinChannelManager.getMutiService().size();
-        int last=((threads-single)/muti)<RpcConstans.MIN_THREADS?(threads-single)/muti:RpcConstans.MIN_THREADS;
+        int last=threads-single;
+        int least=(last/muti)<RpcConstans.MIN_THREADS?last/muti:RpcConstans.MIN_THREADS;
+        Map<String,DataModel> datas=getDataMap();
+        DataModel totalData=mergeData(datas);
+        Map<String, List<Integer>> indexs=new HashMap<>();
+        List<Map.Entry> list=datas.entrySet().stream()
+                .sorted((o1, o2) -> (int)(o2.getValue().getScore()-o1.getValue().getScore()))
+                .collect(Collectors.toList());
+        for(Map.Entry<String,DataModel> entry:list){
+            String service=entry.getKey();
+            DataModel dataModel=entry.getValue();
+            int t=(int)(last*dataModel.getScore()/totalData.getScore());
+            t=t<least?least:t;
+            List<Integer> index=new ArrayList<>();
+            for(int i=0;i<t;i++){
+                if(single==threads){
+                    break;
+                }
+                index.add(single++);
+            }
+            indexs.put(service,index);
+        }
+        if(single<threads){
+            Map.Entry entry=list.get(list.size()-1);
+            List<Integer> index=indexs.get(entry.getKey());
+            while(single<threads){
+                index.add(single++);
+            }
 
+        }
+        paladinChannelManager.setIndexs(indexs);
 
 
     }
@@ -90,8 +118,28 @@ public class PaladinMonitor implements Monitor {
            dataModel.setPass(paladinMetric.pass());
            dataModel.setReject(paladinMetric.reject());
            dataModel.setRt(paladinMetric.rt());
+           dataModel.setScore(dataModel.getReject()*2
+                   +dataModel.getPass()
+                   +dataModel.getRt()
+                   +dataModel.getException());
+
        });
        return map;
+    }
+
+    private DataModel mergeData(Map<String,DataModel> datas){
+        DataModel dataModel=new DataModel();
+        if(datas!=null) {
+            datas.values().forEach(data -> {
+                dataModel.addException(data.getException());
+                dataModel.addPass(data.getPass());
+                dataModel.addReject(data.getReject());
+                dataModel.addRt(data.getRt());
+                dataModel.addSuccess(data.getSuccess());
+                dataModel.addScore(data.getScore());
+            });
+        }
+        return dataModel;
     }
 
 
@@ -101,6 +149,7 @@ public class PaladinMonitor implements Monitor {
         private long pass;
         private long exception;
         private long reject;
+        private long score;
 
         public long getSuccess() {
             return success;
@@ -161,6 +210,17 @@ public class PaladinMonitor implements Monitor {
 
         public void addException(long exception) {
             this.exception += exception;
+        }
+
+        public long getScore() {
+            return score;
+        }
+
+        public void setScore(long score) {
+            this.score = score;
+        }
+        public void addScore(long score){
+            this.score=score;
         }
     }
 

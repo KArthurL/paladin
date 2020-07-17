@@ -5,6 +5,8 @@ import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
@@ -13,25 +15,26 @@ import java.util.concurrent.CountDownLatch;
  * 服务注册
  *
  */
+@Component
 public class ServiceRegistry {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceRegistry.class);
 
     private CountDownLatch latch = new CountDownLatch(1);
-
+    @Value("${rpc.registry.address}")
     private String registryAddress;
 
-    public ServiceRegistry(String registryAddress) {
-        this.registryAddress = registryAddress;
-    }
+    private ZooKeeper zookeeper;
+
 
     public void register(String service,String ip) {
         if (service != null && ip !=null) {
-            ZooKeeper zk = connectServer();
-            if (zk != null) {
-                AddRootNode(zk); // Add root node if not exist
-                createNode(zk, service, ip);
+            if(zookeeper==null){
+                zookeeper=connectServer();
             }
+                AddRootNode(zookeeper); // Add root node if not exist
+                createNode(zookeeper, service, ip);
+
         }
     }
 
@@ -72,10 +75,6 @@ public class ServiceRegistry {
     private void createNode(ZooKeeper zk, String service,String ip) {
         try {
             byte[] ipBytes=ip.getBytes();
-/*            Stat s=zk.exists(RpcConstans.ZK_REGISTRY_PATH+"/"+service,false);
-            if(s==null){
-                zk.create(RpcConstans.ZK_REGISTRY_PATH+"/"+service,serviceBytes,ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-            }*/
             String path = zk.create(RpcConstans.ZK_REGISTRY_PATH+"/"+service, ipBytes, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);
             logger.info("已创建zookeeper节点 ({} => {})", path, ip);
         } catch (KeeperException e) {

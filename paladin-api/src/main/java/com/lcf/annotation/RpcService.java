@@ -1,5 +1,6 @@
 package com.lcf.annotation;
 
+import com.lcf.constants.RpcConstans;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.ElementType;
@@ -18,5 +19,5 @@ import java.lang.annotation.Target;
 public @interface RpcService {
     String group () default "paladin";
     String version() default "1.0.0" ;
-    String type() default "muti";
+    int type() default RpcConstans.MUTI;
 }

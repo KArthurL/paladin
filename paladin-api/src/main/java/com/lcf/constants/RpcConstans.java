@@ -20,6 +20,8 @@ public class RpcConstans {
     public static final int DEFAULT_STATISTIC_MAX_RT=5000;
     public static final int MIN_THREADS=5;
 
+    public static final int DEFAULT_THREADS=100;
+
     /**
      * 默认统计一分钟，划分为60个时间片
      */
