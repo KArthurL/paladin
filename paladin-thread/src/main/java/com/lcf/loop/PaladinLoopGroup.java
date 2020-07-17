@@ -3,7 +3,7 @@ package com.lcf.loop;
 import com.lcf.PaladinTask;
 import com.lcf.channel.PaladinChannelManager;
 import com.lcf.executor.PerTaskExecutor;
-import com.lcf.threadfactory.PaladinThreadFactory;
+import com.lcf.common.thread.PaladinThreadFactory;
 import org.jctools.queues.MpscUnboundedArrayQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,7 +1,7 @@
 package com.lcf.loop;
 
 import com.lcf.constants.RpcConstans;
-import com.lcf.threadlocal.PaladinThreadLocal;
+import com.lcf.common.thread.PaladinThreadLocal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

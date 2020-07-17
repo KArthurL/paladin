@@ -1,6 +1,7 @@
 package com.lcf.common;
 
-import com.lcf.threadlocal.PaladinThreadLocal;
+
+import com.lcf.common.thread.PaladinThreadLocal;
 import io.netty.channel.Channel;
 
 public class RpcContext {

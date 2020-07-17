@@ -1,4 +1,4 @@
-package com.lcf.threadlocal;
+package com.lcf.common.thread;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;

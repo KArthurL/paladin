@@ -1,4 +1,4 @@
-package com.lcf.threadlocal;
+package com.lcf.common.thread;
 
 
 /**

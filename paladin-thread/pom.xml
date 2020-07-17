@@ -24,11 +24,7 @@
             <groupId>org.jctools</groupId>
             <artifactId>jctools-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.lcf</groupId>
-            <artifactId>paladin-api</artifactId>
-            <version>1.0.0</version>
-        </dependency>
+
         <dependency>
             <groupId>com.lcf</groupId>
             <artifactId>paladin-monitor</artifactId>
