@@ -125,7 +125,3 @@ public abstract class AbstractPipeline implements Pipeline {
 
 
 }
-interface test{
-
-}
-class a implements test{}

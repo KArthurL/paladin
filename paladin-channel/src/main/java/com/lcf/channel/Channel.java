@@ -26,6 +26,8 @@ public interface Channel {
 
     void exception(Object object, io.netty.channel.Channel channel);
 
+    void reject(Object request,Object object,io.netty.channel.Channel channel);
+
     Context getContext(Class<?> clazz);
 
 }

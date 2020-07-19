@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 
 public class PaladinServerHandler extends SimpleChannelInboundHandler<PaladinMessage>{
     private static final Logger logger = LoggerFactory.getLogger(PaladinServerHandler.class);
@@ -30,12 +31,18 @@ public class PaladinServerHandler extends SimpleChannelInboundHandler<PaladinMes
             RpcRequest rpcRequest= ProtobufferSerializeUtil.deserializer(data,RpcRequest.class);
             String service=rpcRequest.getServiceName();
             logger.info("recived the request, request: {}",rpcRequest);
-            executorService.execute(new PaladinTask(service) {
-                @Override
-                public void run() {
-                    paladinChannelManager.invoke(rpcRequest,service,ctx.channel());
+            try {
+                executorService.execute(new PaladinTask(service) {
+                    @Override
+                    public void run() {
+                        paladinChannelManager.invoke(rpcRequest, service, ctx.channel());
+                    }
+                });
+            }catch (Exception e){
+                if(e instanceof RejectedExecutionException){
+                    paladinChannelManager.reject(rpcRequest,e,service,ctx.channel());
                 }
-            });
+            }
 
         }
     }

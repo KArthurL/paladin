@@ -4,16 +4,17 @@ import com.lcf.HelloPaladin;
 import com.lcf.annotation.RpcService;
 import com.lcf.constants.RpcConstans;
 
-@RpcService(type = RpcConstans.SINGLE)
+@RpcService
 public class HelloPaladinImpl implements HelloPaladin {
 
     @Override
     public String helloPaladin(String s) {
-        try {
+        throw new RuntimeException("lalala");
+/*     *//*   try {
             Thread.sleep(50);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
-        return "hello paladin "+s;
+        }*//*
+        return "hello paladin "+s;*/
     }
 }

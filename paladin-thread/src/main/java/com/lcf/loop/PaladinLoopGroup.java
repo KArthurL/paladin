@@ -2,17 +2,17 @@ package com.lcf.loop;
 
 import com.lcf.PaladinTask;
 import com.lcf.channel.PaladinChannelManager;
+import com.lcf.constants.RpcConstans;
 import com.lcf.executor.PerTaskExecutor;
 import com.lcf.common.thread.PaladinThreadFactory;
 import org.jctools.queues.MpscUnboundedArrayQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sound.midi.Soundbank;
 import java.util.List;
-import java.util.concurrent.AbstractExecutorService;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
+import java.util.Queue;
+import java.util.concurrent.*;
 
 
 /**
@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class PaladinLoopGroup extends AbstractExecutorService {
 
-    private static final int DEFAULT_MAX_CAPACITANCE=256;
+
     private static final int DEFAULT_EVENT_LOOP_THREADS=100;
     private static final Logger logger= LoggerFactory.getLogger(PaladinLoopGroup.class);
     private final PaladinLoop[] children;
@@ -75,7 +75,7 @@ public class PaladinLoopGroup extends AbstractExecutorService {
     private PaladinLoop newChild(int id){
         return new PaladinLoop(this
                 ,executor
-                ,new MpscUnboundedArrayQueue<>(DEFAULT_MAX_CAPACITANCE)
+                ,new LinkedBlockingQueue<>(RpcConstans.DEFAULT_MAX_CAPACITANCE)//new MpscUnboundedArrayQueue<>(RpcConstans.DEFAULT_MAX_CAPACITANCE)
                 , RejectedHandlerFactory.reject(RejectedHandlerFactory.REJECT)
                 ,id
                 );
@@ -129,4 +129,5 @@ public class PaladinLoopGroup extends AbstractExecutorService {
     public void setPaladinChannelManager(PaladinChannelManager paladinChannelManager) {
         this.paladinChannelManager = paladinChannelManager;
     }
+
 }

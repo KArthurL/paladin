@@ -92,7 +92,9 @@ public class DefaultPaladinPipeline extends AbstractPipeline {
                             , null
                             , obj);
                     getChannel().exception(response,channel);
+                    logger.error("headContext has caughtException, e: {}",response);
                 } catch (Exception e) {
+                    e.printStackTrace();
                     logger.error(e.getMessage());
                 } finally {
                     RpcContext.remove();

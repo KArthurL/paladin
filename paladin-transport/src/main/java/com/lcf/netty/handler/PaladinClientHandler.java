@@ -93,6 +93,11 @@ public class PaladinClientHandler extends SimpleChannelInboundHandler<PaladinMes
 
                 }
             }else{
+                    AsyncInvokeFuture future = invokeMap.remove(response.getRequestId());
+                    if(future!=null){
+                        future.recive(response);
+                        runCallBack(future);
+                    }
 
             }
         }
