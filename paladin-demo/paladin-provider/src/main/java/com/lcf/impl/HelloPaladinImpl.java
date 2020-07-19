@@ -2,8 +2,9 @@ package com.lcf.impl;
 
 import com.lcf.HelloPaladin;
 import com.lcf.annotation.RpcService;
+import com.lcf.constants.RpcConstans;
 
-@RpcService
+@RpcService(type = RpcConstans.SINGLE)
 public class HelloPaladinImpl implements HelloPaladin {
 
     @Override

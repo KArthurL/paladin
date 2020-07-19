@@ -49,7 +49,7 @@ public class PaladinChannelManager{
                         ,service
                         ,entry.getInvoker());
                 channels.put(service,paladinChannel);
-                if(RpcConstans.SINGLE_TYPE.equals(entry.getType())){
+                if(RpcConstans.SINGLE==(entry.getType())){
                     singleService.add(service);
 
                 }else{
@@ -84,7 +84,8 @@ public class PaladinChannelManager{
                 }
                 indexs.put(service,list);
             }
-            logger.info("indexs: {}",indexs);
+            logger.info("singleIndexs: {}",singleIndexs);
+            logger.info("mutiIndexs: {}",indexs);
         }
     }
 
@@ -137,6 +138,10 @@ public class PaladinChannelManager{
 
     public Set<String> getMutiService() {
         return mutiService;
+    }
+
+    public Map<String,Integer> getSingleIndexs(){
+        return singleIndexs;
     }
 
     public synchronized void setIndexs(Map<String,List<Integer>> indexs){

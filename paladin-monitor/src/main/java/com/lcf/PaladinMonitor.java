@@ -70,6 +70,7 @@ public class PaladinMonitor implements Monitor {
     @Override
     public void handle() {
         LOGGER.info("threads re-distribution start");
+        Map<String,Integer> synService=paladinChannelManager.getSingleIndexs();
         int threads=paladinChannelManager.getThreads();
         int single=paladinChannelManager.getSingleService().size();
         int muti=paladinChannelManager.getMutiService().size();
@@ -85,20 +86,22 @@ public class PaladinMonitor implements Monitor {
                     .collect(Collectors.toList());
             for (Map.Entry<String, DataModel> entry : list) {
                 String service = entry.getKey();
-                DataModel dataModel = entry.getValue();
-                LOGGER.info("service: {}, score: {}",service,dataModel.getScore());
-                int t = (int) (last * dataModel.getScore() / totalData.getScore());
-                t = t < least ? least : t;
-                List<Integer> index = new ArrayList<>();
-                for (int i = 0; i < t; i++) {
-                    if (single == threads) {
-                        break;
+                if(!synService.containsKey(service)) {
+                    DataModel dataModel = entry.getValue();
+                    LOGGER.info("service: {}, score: {}", service, dataModel.getScore());
+                    int t = (int) (last * dataModel.getScore() / totalData.getScore());
+                    t = t < least ? least : t;
+                    List<Integer> index = new ArrayList<>();
+                    for (int i = 0; i < t; i++) {
+                        if (single == threads) {
+                            break;
+                        }
+                        index.add(single++);
                     }
-                    index.add(single++);
+                    indexs.put(service, index);
                 }
-                indexs.put(service, index);
             }
-            if (single < threads) {
+            if (single < threads && list.size()>0) {
                 Map.Entry entry = list.get(list.size() - 1);
                 List<Integer> index = indexs.get(entry.getKey());
                 while (single < threads) {

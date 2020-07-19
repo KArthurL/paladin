@@ -12,8 +12,6 @@ public class RpcConstans {
     public static final int SINGLE=1;
     public static final int MUTI=2;
 
-    public static final String SINGLE_TYPE="single";
-    public static final String MUTI_TYPE="muti";
 
     public static final int MESSAGE_HEAD=0X76;
 
