@@ -51,7 +51,7 @@ public class PaladinMonitor implements Monitor {
                     for(;;){
                         handle();
                         try {
-                            TimeUnit.MILLISECONDS.sleep(20000);
+                            TimeUnit.MILLISECONDS.sleep(ms);
                         } catch (InterruptedException e) {
                             LOGGER.error("moniter has interrupt : %s",e.getCause());
                         }
@@ -69,6 +69,7 @@ public class PaladinMonitor implements Monitor {
      */
     @Override
     public void handle() {
+        LOGGER.info("threads re-distribution start");
         int threads=paladinChannelManager.getThreads();
         int single=paladinChannelManager.getSingleService().size();
         int muti=paladinChannelManager.getMutiService().size();
@@ -76,33 +77,38 @@ public class PaladinMonitor implements Monitor {
         int least=(last/muti)<RpcConstans.MIN_THREADS?last/muti:RpcConstans.MIN_THREADS;
         Map<String,DataModel> datas=getDataMap();
         DataModel totalData=mergeData(datas);
-        Map<String, List<Integer>> indexs=new HashMap<>();
-        List<Map.Entry> list=datas.entrySet().stream()
-                .sorted((o1, o2) -> (int)(o2.getValue().getScore()-o1.getValue().getScore()))
-                .collect(Collectors.toList());
-        for(Map.Entry<String,DataModel> entry:list){
-            String service=entry.getKey();
-            DataModel dataModel=entry.getValue();
-            int t=(int)(last*dataModel.getScore()/totalData.getScore());
-            t=t<least?least:t;
-            List<Integer> index=new ArrayList<>();
-            for(int i=0;i<t;i++){
-                if(single==threads){
-                    break;
+        LOGGER.info("totalScore: {}",totalData.getScore());
+        if(totalData.getScore()>0) {
+            Map<String, List<Integer>> indexs = new HashMap<>();
+            List<Map.Entry> list = datas.entrySet().stream()
+                    .sorted((o1, o2) -> (int) (o1.getValue().getScore() - o2.getValue().getScore()))
+                    .collect(Collectors.toList());
+            for (Map.Entry<String, DataModel> entry : list) {
+                String service = entry.getKey();
+                DataModel dataModel = entry.getValue();
+                LOGGER.info("service: {}, score: {}",service,dataModel.getScore());
+                int t = (int) (last * dataModel.getScore() / totalData.getScore());
+                t = t < least ? least : t;
+                List<Integer> index = new ArrayList<>();
+                for (int i = 0; i < t; i++) {
+                    if (single == threads) {
+                        break;
+                    }
+                    index.add(single++);
                 }
-                index.add(single++);
+                indexs.put(service, index);
             }
-            indexs.put(service,index);
-        }
-        if(single<threads){
-            Map.Entry entry=list.get(list.size()-1);
-            List<Integer> index=indexs.get(entry.getKey());
-            while(single<threads){
-                index.add(single++);
-            }
+            if (single < threads) {
+                Map.Entry entry = list.get(list.size() - 1);
+                List<Integer> index = indexs.get(entry.getKey());
+                while (single < threads) {
+                    index.add(single++);
+                }
 
+            }
+            paladinChannelManager.setIndexs(indexs);
+            LOGGER.info("Threads re-distribution result: {}", indexs);
         }
-        paladinChannelManager.setIndexs(indexs);
 
 
     }
@@ -113,15 +119,24 @@ public class PaladinMonitor implements Monitor {
            String service=entry.getKey();
            Metric paladinMetric=entry.getValue().getPaladinMetric();
            DataModel dataModel=new DataModel();
-           dataModel.setException(paladinMetric.exception());
-           dataModel.setSuccess(paladinMetric.success());
-           dataModel.setPass(paladinMetric.pass());
-           dataModel.setReject(paladinMetric.reject());
-           dataModel.setRt(paladinMetric.rt());
-           dataModel.setScore(dataModel.getReject()*2
-                   +dataModel.getPass()
-                   +dataModel.getRt()
-                   +dataModel.getException());
+           long pass=paladinMetric.pass();
+           long success=paladinMetric.success();
+           long reject=paladinMetric.reject();
+           long rt=paladinMetric.rt();
+           long exception=paladinMetric.exception();
+
+           dataModel.setException(exception);
+           dataModel.setSuccess(success);
+           dataModel.setPass(pass);
+           dataModel.setReject(reject);
+           if(pass>0) {
+               dataModel.setRt(rt/pass);
+           }
+           dataModel.setScore(reject*4
+                   +pass*3
+                   +rt
+                   +exception);
+           map.put(service,dataModel);
 
        });
        return map;
@@ -220,7 +235,7 @@ public class PaladinMonitor implements Monitor {
             this.score = score;
         }
         public void addScore(long score){
-            this.score=score;
+            this.score+=score;
         }
     }
 

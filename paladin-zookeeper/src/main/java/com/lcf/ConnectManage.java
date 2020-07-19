@@ -107,7 +107,9 @@ public class ConnectManage {
                     for (final PaladinClientHandler connectedServerHandler : connectedHandlers.get(service)) {
                         SocketAddress remotePeer = connectedServerHandler.getAddress();
                         PaladinClientHandler handler = connectedServerNodes.get(remotePeer);
-                        handler.close();
+                        if(handler!=null) {
+                            handler.close();
+                        }
                         connectedServerNodes.remove(remotePeer);
                     }
                 connectedHandlers.get(service).clear();

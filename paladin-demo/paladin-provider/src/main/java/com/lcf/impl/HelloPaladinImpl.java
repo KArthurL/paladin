@@ -8,6 +8,11 @@ public class HelloPaladinImpl implements HelloPaladin {
 
     @Override
     public String helloPaladin(String s) {
-        return "hello paladin"+s;
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return "hello paladin "+s;
     }
 }

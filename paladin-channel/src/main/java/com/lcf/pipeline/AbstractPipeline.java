@@ -67,6 +67,7 @@ public abstract class AbstractPipeline implements Pipeline {
             Context last=tail.pre();
             last.setNext(context);
             context.setNext(tail);
+            context.setPre(last);
             tail.setPre(context);
         }
         return this;

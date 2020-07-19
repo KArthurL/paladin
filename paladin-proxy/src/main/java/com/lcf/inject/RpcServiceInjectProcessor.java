@@ -44,7 +44,6 @@ public class RpcServiceInjectProcessor implements BeanPostProcessor {
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
-
             }
         }
         return bean;

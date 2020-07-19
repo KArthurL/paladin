@@ -75,7 +75,7 @@ public class ServiceRegistry {
     private void createNode(ZooKeeper zk, String service,String ip) {
         try {
             byte[] ipBytes=ip.getBytes();
-            String path = zk.create(RpcConstans.ZK_REGISTRY_PATH+"/"+service+"/"+"data", ipBytes, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);
+            String path = zk.create(RpcConstans.ZK_REGISTRY_PATH+"/"+service+"/"+"data", ipBytes, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
             logger.info("已创建zookeeper节点 ({} => {})", path, ip);
         } catch (KeeperException e) {
             logger.error("", e);

@@ -37,7 +37,7 @@ public abstract class LeapArray<T> {
         if(intervalInMs<=0){
             throw new IllegalArgumentException("total time interval of the sliding window should be positive");
         }
-        if(intervalInMs % sampleCount == 0) {
+        if(intervalInMs % sampleCount != 0) {
             throw new IllegalArgumentException("time span needs to be evenly divided");
         }
 

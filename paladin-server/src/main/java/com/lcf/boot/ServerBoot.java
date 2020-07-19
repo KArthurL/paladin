@@ -1,6 +1,7 @@
 package com.lcf.boot;
 
 import com.lcf.Entry;
+import com.lcf.PaladinMonitor;
 import com.lcf.PaladinServerHandler;
 import com.lcf.ServiceRegistry;
 import com.lcf.annotation.RpcService;
@@ -45,6 +46,9 @@ public class ServerBoot implements ApplicationContextAware {
     @Value("${rpc.service.address}")
     private String serverAddress;
 
+    @Value("${rpc.threads.ditribution.time}")
+    private int threadsDistribution;
+
     @Autowired
     private ServiceRegistry serviceRegistry;
 
@@ -75,7 +79,6 @@ public class ServerBoot implements ApplicationContextAware {
 
             ChannelFuture future = bootstrap.bind(host, port).sync();
             logger.info("服务启动在端口 {}", port);
-            future.channel().closeFuture().sync();
         }
     }
     @Override
@@ -90,17 +93,12 @@ public class ServerBoot implements ApplicationContextAware {
                 String version = rpcService.version();
                 String service = clazz + ":" + version + "_" + group;
                 int type=rpcService.type();
-                logger.info("正在注册服务: {}", service);
+
                 Entry entry=new Entry();
                 entry.setClazz(value.getClass());
                 entry.setType(type);
                 entry.setInvoker(value);
                 services.put(service,entry);
-                if(serviceRegistry==null || serverAddress==null){
-                    logger.error("serviceRegistry is null");
-                }else{
-                    serviceRegistry.register(service,serverAddress);
-                }
             }
         }
         if(threads==0){
@@ -108,11 +106,23 @@ public class ServerBoot implements ApplicationContextAware {
         }
         PaladinLoopGroup paladinLoopGroup=new PaladinLoopGroup(threads);
         PaladinChannelManager paladinChannelManager=new PaladinChannelManager(services);
+        paladinChannelManager.init(threads);
         paladinLoopGroup.setPaladinChannelManager(paladinChannelManager);
+        PaladinMonitor paladinMonitor=new PaladinMonitor(paladinChannelManager);
+        paladinMonitor.init(threadsDistribution);
         try {
             init(paladinLoopGroup,paladinChannelManager);
+
         } catch (InterruptedException e) {
-            logger.error("Server start fail, error: %s",e.getCause());
+            logger.error("Server start fail, error: {}",e.getCause());
+        }
+        if(serviceRegistry==null || serverAddress==null){
+            logger.error("serviceRegistry is null");
+        }else{
+            services.keySet().forEach(service->{
+                logger.info("正在注册服务: {}", service);
+                serviceRegistry.register(service,serverAddress);
+            });
         }
 
     }

@@ -84,7 +84,7 @@ public class PaladinChannelManager{
                 }
                 indexs.put(service,list);
             }
-
+            logger.info("indexs: {}",indexs);
         }
     }
 
@@ -93,6 +93,7 @@ public class PaladinChannelManager{
     public void invoke(Object object, String service, io.netty.channel.Channel channel){
         com.lcf.channel.Channel channel1=channels.get(service);
         if(channel1!=null){
+            logger.info("thread: {}",Thread.currentThread());
             logger.info("request is invoking, service: {}, request: {}",service,object);
             channel1.invoke(object,channel);
         }else{

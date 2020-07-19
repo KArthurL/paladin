@@ -7,7 +7,7 @@ import com.lcf.data.MetricBucket;
 public class PaladinLeapArray extends LeapArray<MetricBucket> {
 
     public PaladinLeapArray(int sampleCount, int intervalInMs) {
-        super(sampleCount, intervalInMs);
+         super(sampleCount, intervalInMs);
     }
 
     @Override
