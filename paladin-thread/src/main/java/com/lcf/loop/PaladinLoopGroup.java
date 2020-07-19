@@ -5,6 +5,7 @@ import com.lcf.channel.PaladinChannelManager;
 import com.lcf.constants.RpcConstans;
 import com.lcf.executor.PerTaskExecutor;
 import com.lcf.common.thread.PaladinThreadFactory;
+import org.jctools.queues.MpscChunkedArrayQueue;
 import org.jctools.queues.MpscUnboundedArrayQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +76,7 @@ public class PaladinLoopGroup extends AbstractExecutorService {
     private PaladinLoop newChild(int id){
         return new PaladinLoop(this
                 ,executor
-                ,new LinkedBlockingQueue<>(RpcConstans.DEFAULT_MAX_CAPACITANCE)//new MpscUnboundedArrayQueue<>(RpcConstans.DEFAULT_MAX_CAPACITANCE)
+                ,new MpscChunkedArrayQueue<>(RpcConstans.DEFAULT_MAX_CAPACITANCE<=4?4:RpcConstans.DEFAULT_MAX_CAPACITANCE)
                 , RejectedHandlerFactory.reject(RejectedHandlerFactory.REJECT)
                 ,id
                 );
