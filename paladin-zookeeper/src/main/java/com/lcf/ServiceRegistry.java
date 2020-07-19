@@ -32,7 +32,7 @@ public class ServiceRegistry {
             if(zookeeper==null){
                 zookeeper=connectServer();
             }
-                AddRootNode(zookeeper); // Add root node if not exist
+                AddRootNode(zookeeper,service); // Add root node if not exist
                 createNode(zookeeper, service, ip);
 
         }
@@ -59,11 +59,11 @@ public class ServiceRegistry {
         return zk;
     }
 
-    private void AddRootNode(ZooKeeper zk){
+    private void AddRootNode(ZooKeeper zk,String service){
         try {
-            Stat s = zk.exists(RpcConstans.ZK_REGISTRY_PATH, false);
+            Stat s = zk.exists(RpcConstans.ZK_REGISTRY_PATH+"/"+service, false);
             if (s == null) {
-                zk.create(RpcConstans.ZK_REGISTRY_PATH, new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+                zk.create(RpcConstans.ZK_REGISTRY_PATH+"/"+service, new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
             }
         } catch (KeeperException e) {
             logger.error(e.toString());
@@ -75,7 +75,7 @@ public class ServiceRegistry {
     private void createNode(ZooKeeper zk, String service,String ip) {
         try {
             byte[] ipBytes=ip.getBytes();
-            String path = zk.create(RpcConstans.ZK_REGISTRY_PATH+"/"+service, ipBytes, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);
+            String path = zk.create(RpcConstans.ZK_REGISTRY_PATH+"/"+service+"/"+"data", ipBytes, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);
             logger.info("已创建zookeeper节点 ({} => {})", path, ip);
         } catch (KeeperException e) {
             logger.error("", e);

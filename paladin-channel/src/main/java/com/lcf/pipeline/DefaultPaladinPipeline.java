@@ -71,6 +71,7 @@ public class DefaultPaladinPipeline extends AbstractPipeline {
                         , obj
                         , null);
                 getChannel().response(response,channel);
+                logger.info("headContext has responsed");
             } catch (Exception e) {
                 logger.error("rpcContext has no request!");
                 throw new RuntimeException("rpcContext has error");
@@ -126,6 +127,7 @@ public class DefaultPaladinPipeline extends AbstractPipeline {
                 int methodIndex = serviceFastClass.getIndex(methodName, parameterTypes);
                 try {
                     Object result = serviceFastClass.invoke(methodIndex, getInvoker(), arguments);
+                    logger.info("invoke result is : {}",result.toString());
                     getPipeline().response(result);
                 } catch (Exception e) {
                     getPipeline().exception(e);

@@ -46,10 +46,10 @@ public abstract class AbstractContext implements  Context {
         boolean isSuccess=true;
         if(obj!=null){
             try {
-                this.handle(obj);
+                this. handle(obj);
             }catch (Exception e){
                 isSuccess=false;
-                logger.error(name+" handle message has error!",e.getCause());
+                logger.error(name+" handle message has error!"+e.getCause());
                 if(!Objects.isNull(pre)){
                     this.onException(e);
                 }
@@ -73,7 +73,7 @@ public abstract class AbstractContext implements  Context {
                     this.onException(e);
                 }
             }
-            if(isSuccess && !Objects.isNull(next)){
+            if(isSuccess && !Objects.isNull(pre)){
                 pre.onResponse(obj);
             }
         }
@@ -89,7 +89,7 @@ public abstract class AbstractContext implements  Context {
                 }
             }catch (Exception e){
 
-                logger.error(name+" handle response has error!",e.getCause());
+                logger.error(name+" handle response has error!"+e.getCause());
                 if(!Objects.isNull(pre)){
                     pre.onException(e);
                 }

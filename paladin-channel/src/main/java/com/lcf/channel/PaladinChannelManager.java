@@ -93,21 +93,24 @@ public class PaladinChannelManager{
     public void invoke(Object object, String service, io.netty.channel.Channel channel){
         com.lcf.channel.Channel channel1=channels.get(service);
         if(channel1!=null){
+            logger.info("request is invoking, service: {}, request: {}",service,object);
             channel1.invoke(object,channel);
         }else{
-           logger.error("there is no service for : %s",service);
+           logger.error("there is no service for :{}",service);
         }
     }
 
     public void response(Object object,io.netty.channel.Channel channel){
         PaladinMessage response=buildMessage(object);
         channel.writeAndFlush(response);
+        logger.info("request has been response: {}",object.toString());
 
     }
 
     public void exception(Object object,io.netty.channel.Channel channel){
         PaladinMessage response=buildMessage(object);
         channel.writeAndFlush(response);
+        logger.info("request has exception : {}",object);
     }
 
     public PaladinMessage buildMessage(Object object){

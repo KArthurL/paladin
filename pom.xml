@@ -14,11 +14,11 @@
         <module>paladin-server</module>
         <module>paladin-thread</module>
         <module>paladin-channel</module>
-        <module>paladin-sample</module>
         <module>paladin-monitor</module>
         <module>paladin-serialization</module>
         <module>paladin-transport</module>
         <module>paladin-proxy</module>
+        <module>paladin-demo</module>
     </modules>
     <packaging>pom</packaging>
 

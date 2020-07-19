@@ -51,7 +51,10 @@ public class ServiceDiscovery {
 
     public void discover(String service) {
         if(zookeeper!=null){
+
             watchNode(zookeeper,service);
+        }else{
+            logger.error("zookeeper init fail");
         }
     }
 

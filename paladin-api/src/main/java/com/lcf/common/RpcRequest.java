@@ -2,6 +2,7 @@ package com.lcf.common;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Arrays;
 
 public class RpcRequest {
 
@@ -20,9 +21,6 @@ public class RpcRequest {
 
     private Object[] arguments;
 
-    private SocketAddress localAddress;
-
-    private SocketAddress remoteAddress;
 
     public String getMethodName() {
         return methodName;
@@ -48,21 +46,9 @@ public class RpcRequest {
         this.arguments = arguments;
     }
 
-    public SocketAddress getLocalAddress() {
-        return localAddress;
-    }
 
-    public void setLocalAddress(SocketAddress localAddress) {
-        this.localAddress = localAddress;
-    }
 
-    public SocketAddress getRemoteAddress() {
-        return remoteAddress;
-    }
 
-    public void setRemoteAddress(SocketAddress remoteAddress) {
-        this.remoteAddress = remoteAddress;
-    }
 
     public RpcContext getRpcContext() {
         return rpcContext;
@@ -94,5 +80,18 @@ public class RpcRequest {
 
     public void setServiceName(String serviceName) {
         this.serviceName = serviceName;
+    }
+
+    @Override
+    public String toString() {
+        return "RpcRequest{" +
+                "RequestId='" + RequestId + '\'' +
+                ", rpcContext=" + rpcContext +
+                ", className='" + className + '\'' +
+                ", serviceName='" + serviceName + '\'' +
+                ", methodName='" + methodName + '\'' +
+                ", parameterTypes=" + Arrays.toString(parameterTypes) +
+                ", arguments=" + Arrays.toString(arguments) +
+                '}';
     }
 }

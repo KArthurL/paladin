@@ -70,4 +70,15 @@ public class RpcContext {
     public void setChannel(Channel channel) {
         this.channel = channel;
     }
+
+    @Override
+    public String toString() {
+        return "RpcContext{" +
+                "traceId='" + traceId + '\'' +
+                ", startTime=" + startTime +
+                ", rpcRequest=" + rpcRequest +
+                ", rpcResponse=" + rpcResponse +
+                ", channel=" + channel +
+                '}';
+    }
 }

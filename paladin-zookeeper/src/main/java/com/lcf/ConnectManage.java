@@ -84,30 +84,34 @@ public class ConnectManage {
 
                 // Close and remove invalid server nodes
                 List<PaladinClientHandler> serviceHandlers=connectedHandlers.get(service);
-                for (int i = 0; i < serviceHandlers.size(); ++i) {
-                    PaladinClientHandler connectedServerHandler = serviceHandlers.get(i);
-                    SocketAddress remotePeer = connectedServerHandler.getAddress();
-                    if (!newAllServerNodeSet.contains(remotePeer)) {
-                        logger.info("移除无效节点 " + remotePeer);
-                        PaladinClientHandler handler = connectedServerNodes.get(remotePeer);
-                        if (handler != null) {
-                            handler.close();
+                if(serviceHandlers!=null) {
+                    for (int i = 0; i < serviceHandlers.size(); ++i) {
+                        PaladinClientHandler connectedServerHandler = serviceHandlers.get(i);
+                        SocketAddress remotePeer = connectedServerHandler.getAddress();
+                        if (!newAllServerNodeSet.contains(remotePeer)) {
+                            logger.info("移除无效节点 " + remotePeer);
+                            PaladinClientHandler handler = connectedServerNodes.get(remotePeer);
+                            if (handler != null) {
+                                handler.close();
+                            }
+                            connectedServerNodes.remove(remotePeer);
+                            serviceHandlers.remove(connectedServerHandler);
                         }
-                        connectedServerNodes.remove(remotePeer);
-                        serviceHandlers.remove(connectedServerHandler);
                     }
                 }
 
 
             } else { // No available server node ( All server nodes are down )
                 logger.error("No available server node. All server nodes are down !!!");
-                for (final PaladinClientHandler connectedServerHandler : connectedHandlers.get(service)) {
-                    SocketAddress remotePeer = connectedServerHandler.getAddress();
-                    PaladinClientHandler handler = connectedServerNodes.get(remotePeer);
-                    handler.close();
-                    connectedServerNodes.remove(connectedServerHandler);
+                if(connectedHandlers.get(service)!=null) {
+                    for (final PaladinClientHandler connectedServerHandler : connectedHandlers.get(service)) {
+                        SocketAddress remotePeer = connectedServerHandler.getAddress();
+                        PaladinClientHandler handler = connectedServerNodes.get(remotePeer);
+                        handler.close();
+                        connectedServerNodes.remove(remotePeer);
+                    }
+                connectedHandlers.get(service).clear();
                 }
-                connectedHandlers.getOrDefault(service,new CopyOnWriteArrayList<>()).clear();
             }
         }
     }
@@ -150,7 +154,13 @@ public class ConnectManage {
     }
 
     private void addHandler(String service,PaladinClientHandler handler) {
-        connectedHandlers.getOrDefault(service,new CopyOnWriteArrayList<>()).add(handler);
+        if(connectedHandlers.containsKey(service)){
+            connectedHandlers.get(service).add(handler);
+        }else{
+            List<PaladinClientHandler> handlers=new CopyOnWriteArrayList<>();
+            handlers.add(handler);
+            connectedHandlers.put(service,handlers);
+        }
         InetSocketAddress remoteAddress = (InetSocketAddress) handler.getChannel().remoteAddress();
         connectedServerNodes.put(remoteAddress, handler);
         signalAvailableHandler(service);
@@ -176,7 +186,7 @@ public class ConnectManage {
 
     public PaladinClientHandler chooseHandler(String service) {
         List<PaladinClientHandler> handlers=connectedHandlers.get(service);
-        int size = handlers.size();
+        int size = handlers==null?-1:handlers.size();
         while (isRuning && size <= 0) {
             try {
                 boolean available = waitingForHandler(service);

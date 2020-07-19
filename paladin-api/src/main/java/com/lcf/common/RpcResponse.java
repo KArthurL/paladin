@@ -43,4 +43,14 @@ public class RpcResponse {
     public void setRequestId(String requestId) {
         this.requestId = requestId;
     }
+
+    @Override
+    public String toString() {
+        return "RpcResponse{" +
+                "requestId='" + requestId + '\'' +
+                ", success=" + success +
+                ", result=" + result +
+                ", exception=" + exception +
+                '}';
+    }
 }

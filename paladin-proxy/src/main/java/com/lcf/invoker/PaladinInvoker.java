@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
@@ -42,18 +43,23 @@ public class PaladinInvoker implements InvocationHandler {
         }
         RpcRequest request = buildRequest(method, args);
         PaladinClientHandler paladinClientHandler= ConnectManage.getInstance().chooseHandler(service);
-        request.setRemoteAddress(paladinClientHandler.getAddress());
         if(Future.class.isAssignableFrom(method.getReturnType())){
             return paladinClientHandler.Send(request);
         }else{
             AsyncInvokeFuture rpcFuture=paladinClientHandler.Send(request);
-            if (!rpcFuture.response.isSuccess()){
-                throw new RuntimeException("rpc调用失败，原因："+ rpcFuture.response.getException());
+            try {
+                rpcFuture.get();
+                if (!rpcFuture.response.isSuccess()){
+                    throw new RuntimeException("rpc调用失败，原因："+ rpcFuture.response.getException());
+                }
+                return rpcFuture.response.getResult();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
             }
-            return rpcFuture.response.getResult();
+            return null;
         }
-
-
     }
 
     private RpcRequest buildRequest(Method method,Object[] args){

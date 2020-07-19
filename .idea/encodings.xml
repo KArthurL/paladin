@@ -5,9 +5,14 @@
     <file url="file://$PROJECT_DIR$/paladin-api" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/paladin-channel" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/paladin-client" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/paladin-demo" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/paladin-demo/paladin-consumer" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/paladin-demo/paladin-interface" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/paladin-demo/paladin-provider" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/paladin-monitor" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/paladin-proxy" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/paladin-sample" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/paladin-sample/service" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/paladin-serialization" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/paladin-server" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/paladin-thread" charset="UTF-8" />

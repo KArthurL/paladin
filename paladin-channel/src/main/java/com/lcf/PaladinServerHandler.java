@@ -29,6 +29,7 @@ public class PaladinServerHandler extends SimpleChannelInboundHandler<PaladinMes
             byte[] data=msg.getContent();
             RpcRequest rpcRequest= ProtobufferSerializeUtil.deserializer(data,RpcRequest.class);
             String service=rpcRequest.getServiceName();
+            logger.info("recived the request, request: {}",rpcRequest);
             executorService.execute(new PaladinTask(service) {
                 @Override
                 public void run() {
@@ -39,7 +40,10 @@ public class PaladinServerHandler extends SimpleChannelInboundHandler<PaladinMes
         }
     }
 
-
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        logger.info("remote ip is : "+ ctx.channel().remoteAddress());
+    }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {

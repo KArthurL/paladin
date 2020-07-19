@@ -3,6 +3,8 @@ package com.lcf.inject;
 import com.lcf.ServiceDiscovery;
 import com.lcf.annotation.RpcReference;
 import com.lcf.invoker.PaladinInvoker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -12,7 +14,7 @@ import java.lang.reflect.Proxy;
 
 @Component
 public class RpcServiceInjectProcessor implements BeanPostProcessor {
-
+    private static final Logger logger=LoggerFactory.getLogger(RpcServiceInjectProcessor.class);
 
     @Autowired
     ServiceDiscovery serviceDiscovery;
@@ -38,10 +40,11 @@ public class RpcServiceInjectProcessor implements BeanPostProcessor {
                     field.setAccessible(true);
                     field.set(bean, o2);
                     serviceDiscovery.discover(service);
+                    logger.info("service discovered, service: {}",service);
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
-                return bean;
+
             }
         }
         return bean;

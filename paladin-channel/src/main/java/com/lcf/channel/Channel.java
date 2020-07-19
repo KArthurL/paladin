@@ -20,7 +20,7 @@ public interface Channel {
 
     List<Context> getContexts();
 
-    void invoke(Object object, io.netty.channel.Channel channel);
+    void  invoke(Object object, io.netty.channel.Channel channel);
 
     void response(Object object, io.netty.channel.Channel channel);
 

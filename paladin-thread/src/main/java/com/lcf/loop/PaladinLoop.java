@@ -59,7 +59,18 @@ public class PaladinLoop extends AbstractExecutorService {
     }
 
     private void run(){
-        //to do
+        for(;;){
+            try{
+                Runnable runnable=queue.poll();
+                if(runnable==null && thread==null){
+                    LockSupport.park();
+                }else{
+                    runnable.run();
+                }
+            }catch (Exception e){
+
+            }
+        }
     }
 
     @Override

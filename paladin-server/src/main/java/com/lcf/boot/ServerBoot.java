@@ -84,7 +84,7 @@ public class ServerBoot implements ApplicationContextAware {
         Map<String, Entry> services=new HashMap<>();
         if (beansWithAnnotation!=null){
             for (Object value : beansWithAnnotation.values()) {
-                String clazz = value.getClass().getName();
+                String clazz = value.getClass().getInterfaces()[0].getName();
                 RpcService rpcService = value.getClass().getAnnotation(RpcService.class);
                 String group = rpcService.group();
                 String version = rpcService.version();

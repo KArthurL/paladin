@@ -56,7 +56,6 @@ public class PaladinDecoder extends ByteToMessageDecoder {
 
             // 至此，读到一条完整报文
             byte[] data = new byte[length - 4];
-            System.out.println(length);
             int type = in.readInt();
             in.readBytes(data);
             PaladinMessage eflMessage = new PaladinMessage(length, type, data);
