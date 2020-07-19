@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
 @RestController
 public class HelloServiceController {
 
-    private static final ExecutorService EXECUTOR_SERVICE= Executors.newFixedThreadPool(100);
+    private static final ExecutorService EXECUTOR_SERVICE= Executors.newFixedThreadPool(50);
 
     @RpcReference
     private HelloWorld helloWorld;
@@ -44,11 +44,11 @@ public class HelloServiceController {
     }
     @RequestMapping(path = "/start")
     public String startTest(){
-        for(int i=0;i<100;i++){
+        for(int i=0;i<50;i++){
             EXECUTOR_SERVICE.execute(new Runnable() {
                 @Override
                 public void run() {
-                    for(;;){
+                    for(int i=0;i<10;i++){
                         try{
                             helloWorld.hello("test");
                             Thread.sleep(1000);
@@ -61,6 +61,8 @@ public class HelloServiceController {
         }
         return "suceess";
     }
+
+
 
 
 }
