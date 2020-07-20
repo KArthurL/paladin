@@ -26,7 +26,7 @@ public class RpcConstans {
     public static final int DEFAULT_SAMPLE_COUNT=60;
     public static final int DEFAULT_INTERVAL_IN_MS=60*1000;
 
-    public static final int DEFAULT_MAX_CAPACITANCE=2;
+    public static final int DEFAULT_MAX_CAPACITANCE=4;
 
 
 }

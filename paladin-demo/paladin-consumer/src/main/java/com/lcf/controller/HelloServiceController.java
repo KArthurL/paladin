@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
 @RestController
 public class HelloServiceController {
 
-    private static final ExecutorService EXECUTOR_SERVICE= Executors.newFixedThreadPool(50);
+    private static final ExecutorService EXECUTOR_SERVICE= Executors.newFixedThreadPool(100);
 
     @RpcReference
     private HelloWorld helloWorld;
@@ -42,24 +42,22 @@ public class HelloServiceController {
     public String helloSyn(String value){
         return helloSynWorld.helloSyn(value);
     }
+
     @RequestMapping(path = "/start")
     public String startTest(){
-        for(int i=0;i<50;i++){
-            EXECUTOR_SERVICE.execute(new Runnable() {
-                @Override
-                public void run() {
-                    for(int i=0;i<10;i++){
-                        try{
-                            helloWorld.hello("test");
-                            Thread.sleep(1000);
-                        }catch (Exception e){
-                            e.printStackTrace();
-                        }
+        for(int i=0;i<100;i++){
+            EXECUTOR_SERVICE.execute(() -> {
+                for(;;){
+                    try{
+                        helloWorld.hello("test");
+                        Thread.sleep(2000);
+                    }catch (Exception e){
+                        e.printStackTrace();
                     }
                 }
             });
         }
-        return "suceess";
+        return "success";
     }
 
 
